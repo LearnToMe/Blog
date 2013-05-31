@@ -4,4 +4,7 @@ url: http://git.learntome.org
 author: KaiyiZhang
 pygments: true
 paginate: 16
-exclude: ['Draft','TransMe']
+exclude: 
+  - Draft
+  - TransMe
+  - README.md
