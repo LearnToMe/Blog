@@ -8,3 +8,5 @@ tags:
 ---
 
 Hello, World!
+    Logo:
+    ![LearnToMe] (/media/img/logo.png) 
