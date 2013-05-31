@@ -6,7 +6,5 @@ categories:
 tags:
 - Hello
 ---
-
 Hello, World!
-    Logo:
-    ![LearnToMe] (/media/img/logo.png) 
+![LearnToMe] (/media/img/logo.png) 
