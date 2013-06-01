@@ -8,9 +8,10 @@ tags:
 - Web Security
 - Sql Injection
 ---
+
 1. 什么是Sql Injection(Sql 注入)
 
-[Sql Injcetion][Sql Injection]是一种非常流行的Web应用程序攻击方法. 通过Sql Injection攻击, 用户可以非法的访问网站的数据库, 甚至导出你的数据(拖库).
+[Sql Injcetion][Sql Inection]是一种非常流行的Web应用程序攻击方法. 通过Sql Injection攻击, 用户可以非法的访问网站的数据库, 甚至导出你的数据(拖库).
 
 通过Sql Injection可以达到什么目的?
 
@@ -180,4 +181,13 @@ Step 10:
 下来的, 就交给你了.
 
 
+英文原文: [Hacking website using sql injection][origin]
+
+<!-- 原文地址 -->
+[origin]: http://www.breakthesecurity.com/2010/12/hacking-website-using-sql-injection.html
+
+<!-- 参考链接 -->
+
+<!-- 外部链接 -->
 [Sql Injection]: http://en.wikipedia.org/wiki/SQL_injection "Sql Injection"
+
